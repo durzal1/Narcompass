@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "213725812876",
+    "project_id": "pennapps-narcan",
+    "storage_bucket": "pennapps-narcan.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:213725812876:android:b9afca9904fdc8815843a9",
+        "android_client_info": {
+          "package_name": "com.example.better_homework"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_P5A9TiN2HrOVyKn4gVrC2nGoGnMEVZc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
