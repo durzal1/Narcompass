@@ -246,16 +246,31 @@ class AnimatedHelpButtonState extends State<AnimatedHelpButton> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Help needed',
-                            style: TextStyle(fontSize: 30),
-                            color: Colors.white,
+                            style: TextStyle(fontSize: 30, color: Colors.white),
+                            // color: Colors.white,
                           ),
-                          Text('Age:          $age'),
-                          Text('First Name:   $firstName'),
-                          Text('Phone Number: $phoneNumber'),
-                          Text('Gender:       $gender'),
-                          Text('Last Name:    $lastName'),
+                          Text(
+                            'Age:          $age',
+                            style: TextStyle(fontSize: 20, color: Colors.white),
+                          ),
+                          Text(
+                            'First Name:   $firstName',
+                            style: TextStyle(fontSize: 20, color: Colors.white),
+                          ),
+                          Text(
+                            'Phone Number: $phoneNumber',
+                            style: TextStyle(fontSize: 20, color: Colors.white),
+                          ),
+                          Text(
+                            'Gender:       $gender',
+                            style: TextStyle(fontSize: 20, color: Colors.white),
+                          ),
+                          Text(
+                            'Last Name:    $lastName',
+                            style: TextStyle(fontSize: 20, color: Colors.white),
+                          ),
                         ],
                       );
                     } else {
@@ -533,7 +548,6 @@ class MapSampleState extends State<MapSample> {
     var res1 = await narcan.where('accepted', isEqualTo: user.email).get();
 
     if (accepted != '' || res1.docs.length > 0) {
-      narcanTimer?.cancel();
       return;
     }
 
