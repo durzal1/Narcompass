@@ -10,6 +10,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'dart:math';
+import 'package:twilio_flutter/twilio_flutter.dart';
+
 // Copyright 2022, the Chromium project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
@@ -47,6 +49,10 @@ Future<void> addUserEmailToFirestore(String email) async {
     });
   }
 }
+
+String person_email = '';
+
+bool help_sent = false;
 
 // /// Requires that a Firebase local emulator is running locally.
 // /// See https://firebase.flutter.dev/docs/auth/start/#optional-prototype-and-test-with-firebase-local-emulator-suite
@@ -166,12 +172,8 @@ class MapSample extends StatefulWidget {
   State<MapSample> createState() => MapSampleState();
 }
 
-String p_email = '';
-
 class AnimatedHelpButton extends StatefulWidget {
-  AnimatedHelpButton(String email, {super.key}) {
-    p_email = email;
-  }
+  AnimatedHelpButton(String email, {super.key}) {}
 
   @override
   // ignore: no_logic_in_create_state
@@ -191,7 +193,6 @@ class AnimatedHelpButtonState extends State<AnimatedHelpButton> {
   @override
   void initState() {
     // TODO: implement initState
-    email_need = p_email;
 
     super.initState();
   }
@@ -201,7 +202,7 @@ class AnimatedHelpButtonState extends State<AnimatedHelpButton> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
-    if (p_email != '') {
+    if (person_email != '') {
       lifeRaftVisibility = false;
       _height = -1;
       _width = -1;
@@ -214,6 +215,7 @@ class AnimatedHelpButtonState extends State<AnimatedHelpButton> {
         duration: const Duration(seconds: 1),
         color: Colors.blue,
         curve: Curves.fastOutSlowIn,
+        margin: EdgeInsets.only(left: 40),
         child: Column(
           children: [
             Expanded(
@@ -230,7 +232,7 @@ class AnimatedHelpButtonState extends State<AnimatedHelpButton> {
 
                       // Assuming you have the person.key
                       var userDoc = snapshot.data?.docs.firstWhere(
-                        (doc) => doc['email'] == p_email,
+                        (doc) => doc['email'] == person_email,
                       );
 
                       if (userDoc == null) {
@@ -240,7 +242,6 @@ class AnimatedHelpButtonState extends State<AnimatedHelpButton> {
                       var age = userDoc['age'].toString();
                       var firstName = userDoc['firstName'];
                       var phoneNumber = userDoc['phoneNumber'];
-                      var gender = userDoc['gender'];
                       var lastName = userDoc['lastName'];
 
                       return Column(
@@ -261,10 +262,6 @@ class AnimatedHelpButtonState extends State<AnimatedHelpButton> {
                           ),
                           Text(
                             'Phone Number: $phoneNumber',
-                            style: TextStyle(fontSize: 20, color: Colors.white),
-                          ),
-                          Text(
-                            'Gender:       $gender',
                             style: TextStyle(fontSize: 20, color: Colors.white),
                           ),
                           Text(
@@ -301,12 +298,12 @@ class AnimatedHelpButtonState extends State<AnimatedHelpButton> {
                             FirebaseFirestore.instance.collection('narcan');
 
                         var res = await narcan
-                            .where('email', isEqualTo: p_email)
+                            .where('email', isEqualTo: person_email)
                             .get();
                         final docId = res.docs.first.id;
 
                         narcan.doc(docId).set({
-                          'email': p_email,
+                          'email': person_email,
                           'accepted': user.email
                         }).then((_) {
                           print('Data updated in Firebase successfully');
@@ -316,13 +313,13 @@ class AnimatedHelpButtonState extends State<AnimatedHelpButton> {
                         setState(() {
                           lifeRaftVisibility = true; // Minimize the container
                           _height = screenHeight * .1;
-                          p_email = '';
+                          person_email = '';
                           showDialog(
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
                                     title: Text(
-                                        "Your request for help has been recieved! You will be notified when someone is on the way to help."));
+                                        "The person you are responding to has been alerted that you are on your way."));
                               });
                         });
                       },
@@ -362,9 +359,10 @@ class AnimatedHelpButtonState extends State<AnimatedHelpButton> {
         duration: const Duration(seconds: 1),
         color: Color.fromARGB(255, 0, 142, 250),
         curve: Curves.fastOutSlowIn,
+        margin: EdgeInsets.only(left: 40),
         child: lifeRaftVisibility
             ? IconButton(
-                iconSize: 72,
+                iconSize: 100,
                 icon: const Icon(Icons.support),
                 onPressed: () {
                   lifeRaftVisibility = false;
@@ -377,6 +375,17 @@ class AnimatedHelpButtonState extends State<AnimatedHelpButton> {
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      "I Need Help",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                   Expanded(
                     child: AnimatedContainer(
                       duration: Duration(milliseconds: 300),
@@ -396,20 +405,30 @@ class AnimatedHelpButtonState extends State<AnimatedHelpButton> {
                               onSurface: Colors.grey,
                               shadowColor: Colors.grey,
                               elevation: 5,
+                              minimumSize: Size((screenWidth * 0.5) - 32,
+                                  screenHeight * 0.33),
                             ),
                             onPressed: () async {
                               // Implement your Confirm button action here
                               // For example, you can add code to confirm an action.
                               String userEmail = user.email!;
-
                               if (userEmail != null && userEmail.isNotEmpty) {
                                 addUserEmailToFirestore(userEmail);
                               }
+
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                        title: Text(
+                                            "Your request for help has been recieved! Someone will be on their way shortly to help you."));
+                                  });
 
                               setState(() {
                                 lifeRaftVisibility =
                                     true; // Minimize the container
                                 _height = screenHeight * .1;
+                                help_sent = true;
                               });
                             },
                             child: Text('Confirm'),
@@ -419,6 +438,8 @@ class AnimatedHelpButtonState extends State<AnimatedHelpButton> {
                               onSurface: Colors.grey,
                               shadowColor: Colors.grey,
                               elevation: 5,
+                              minimumSize: Size((screenWidth * 0.5) - 32,
+                                  screenHeight * 0.33),
                             ),
                             onPressed: () {
                               setState(() {
@@ -446,7 +467,7 @@ class MapSampleState extends State<MapSample> {
   GoogleMapController? mapController; //contrller for Google map
   PolylinePoints polylinePoints = PolylinePoints();
 
-  String googleAPiKey = "AIzaSyADx8GqeqwZx9B8uFlCUUtDe8BLa_A0gtw";
+  String googleAPiKey = "-";
 
   Set<Marker> markers = Set(); //markers for google map
   Map<PolylineId, Polyline> polylines = {}; //polylines to show direction
@@ -531,7 +552,6 @@ class MapSampleState extends State<MapSample> {
 
   final locationUpdateInterval =
       Duration(seconds: 10); // Update location every 10 seconds
-  String person_email = '';
 
   Future<void> _alertHelp(
       MapEntry<String, MapEntry<LatLng, double>> person) async {
@@ -556,8 +576,13 @@ class MapSampleState extends State<MapSample> {
     startLocation = LatLng(latitude, longitude);
     getDirections();
 
-    setState(() {
+    setState(() async {
       person_email = person.key;
+      CollectionReference users =
+          FirebaseFirestore.instance.collection('users');
+
+      var res = await users.where('email', isEqualTo: person.key).get();
+      person_name = res.docs.first['firstName'];
     });
 
     // Call _GetInfo to retrieve personal information
@@ -589,7 +614,11 @@ class MapSampleState extends State<MapSample> {
     var l = await loc.where('email', isEqualTo: accepted).get();
     var m = l.docs.first;
     var kk = LatLng(m['latitude'], m['longitude']);
+    endLocation = kk;
     double d = await getDistance(kk);
+
+    getDirections();
+
     if (d == -1) d = 0;
     FirebaseFirestore.instance
         .collection('users')
@@ -599,16 +628,25 @@ class MapSampleState extends State<MapSample> {
         if (user.email == doc['email']) {
           String phone = doc['phoneNumber'];
 
+          CollectionReference users =
+              FirebaseFirestore.instance.collection('users');
+
+          var helper = await users.where('email', isEqualTo: accepted).get();
+
           if (r.docs.isNotEmpty && d < 5.0) {
             ref.doc(r.docs.first.id).set({'email': user.email, 'var': 'z'});
           } else if (d < 5.0 && r.docs.isEmpty) {
-            sendMessage(phone, "Help is $d km away!");
+            sendMessage(
+                phone,
+                helper.docs.first['firstName'] +
+                    " is helping! They are $d km away!");
             ref.add({'email': user.email, 'var': 'n'});
             showDialog(
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
-                    title: Text(phone + " is helping! They are $d km away!"));
+                    title: Text(helper.docs.first['firstName'] +
+                        " is helping! They are $d km away!"));
               },
             );
           } else if (r.docs.isEmpty) {
@@ -788,21 +826,29 @@ class MapSampleState extends State<MapSample> {
     mapController = controller;
   }
 
+  String name = 'Map';
+  String person_name = '';
+
   @override
   Widget build(BuildContext context) {
+    String dd = distance.toStringAsFixed(1);
     return Scaffold(
-      appBar: AppBar(title: const Text('Map'), actions: <Widget>[
-        IconButton(
-          padding: EdgeInsets.only(left: 25.0),
-          icon: Icon(Icons.settings),
-          iconSize: 50,
-          color: Colors.black,
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => SettingsPage()),
-          ),
-        ),
-      ]),
+      appBar: AppBar(
+          title: Text(help_sent
+              ? 'Help is $dd km away'
+              : (person_name != '' ? '$person_name is $dd km away' : name)),
+          actions: <Widget>[
+            IconButton(
+              padding: EdgeInsets.only(left: 25.0),
+              icon: Icon(Icons.settings),
+              iconSize: 50,
+              color: Colors.black,
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsPage()),
+              ),
+            ),
+          ]),
       floatingActionButton: AnimatedHelpButton(
         person_email,
       ),

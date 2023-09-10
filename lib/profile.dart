@@ -42,7 +42,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   bool showSaveButton = false;
   bool isLoading = false;
-  String? gender;
 
   @override
   void initState() {
@@ -163,7 +162,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             if (userProviders.contains('phone'))
                               const Icon(Icons.phone),
                             if (userProviders.contains('password'))
-                              const Icon(Icons.mail),
+                              const Icon(Icons.lock),
                             if (userProviders.contains('google.com'))
                               SizedBox(
                                 width: 24,
@@ -177,7 +176,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         TextFormField(
                           controller: firstNameController,
                           decoration: const InputDecoration(
-                            icon: Icon(Icons.phone),
+                            icon: Icon(Icons.badge),
                             hintText: 'Bill',
                             labelText: 'First Name',
                           ),
@@ -185,7 +184,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         TextFormField(
                           controller: lastNameController,
                           decoration: const InputDecoration(
-                            icon: Icon(Icons.phone),
+                            icon: Icon(Icons.badge),
                             hintText: 'Shake',
                             labelText: 'Last Name',
                           ),
@@ -193,7 +192,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         TextFormField(
                           controller: ageController,
                           decoration: const InputDecoration(
-                            icon: Icon(Icons.phone),
+                            icon: Icon(Icons.military_tech),
                             hintText: '19',
                             labelText: 'Age',
                           ),
@@ -205,24 +204,6 @@ class _ProfilePageState extends State<ProfilePage> {
                             hintText: '+33612345678',
                             labelText: 'Phone number',
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        DropdownButtonFormField<String>(
-                          value: gender,
-                          items: ["Male", "Female"]
-                              .map((label) => DropdownMenuItem(
-                                    child: Text(label.toString()),
-                                    value: label,
-                                  ))
-                              .toList(),
-                          decoration: const InputDecoration(
-                            icon: Icon(Icons.person),
-                            hintText: 'Gender',
-                            labelText: 'Gender',
-                          ),
-                          onChanged: (String? s) {
-                            gender = s;
-                          },
                         ),
                         const Divider(),
                         TextButton(
@@ -283,7 +264,6 @@ class _ProfilePageState extends State<ProfilePage> {
         'age': int.parse(ageController.text),
         'email': email,
         'firstName': firstNameController.text,
-        'gender': gender,
         'lastName': lastNameController.text,
         'phoneNumber': phoneController.text,
         'narcan': narcanController.text,
@@ -298,7 +278,6 @@ class _ProfilePageState extends State<ProfilePage> {
         'age': int.parse(ageController.text),
         'email': email,
         'firstName': firstNameController.text,
-        'gender': gender,
         'lastName': lastNameController.text,
         'phoneNumber': phoneController.text,
         'narcanNumber': narcanController.text,
@@ -327,7 +306,6 @@ class _ProfilePageState extends State<ProfilePage> {
             firstNameController.text = doc['firstName'];
             phoneController.text = doc['phoneNumber'];
             narcanController.text = doc['narcan'];
-            gender = doc['gender'];
             lastNameController.text = doc['lastName'];
           });
 
